@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import MockInterview from "../components/MockInterview";
+import InterviewAnalytics from "../components/InterviewAnalytics";
 export default function ApplicantDashboard() {
   const [activeTab, setActiveTab] = useState("browse");
   const [jobs, setJobs] = useState([]);
@@ -8,15 +9,19 @@ export default function ApplicantDashboard() {
   const [resumeFile, setResumeFile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ NEW STATES FOR SEARCH
   const [search, setSearch] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+
+  // 🎭 NEW STATE
+  const [selectedJobForInterview, setSelectedJobForInterview] = useState(null);
 
   const token = localStorage.getItem("token");
 
   /* FETCH JOBS */
   const fetchJobs = async () => {
-    const res = await axios.get("https://job-portal-mern-6.onrender.com/api/jobs");
+    const res = await axios.get(
+      "https://job-portal-mern-6.onrender.com/api/jobs"
+    );
     setJobs(res.data);
   };
 
@@ -55,9 +60,7 @@ export default function ApplicantDashboard() {
         `https://job-portal-mern-6.onrender.com/api/applications/${jobId}`,
         formData,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -73,7 +76,6 @@ export default function ApplicantDashboard() {
   const alreadyApplied = (jobId) =>
     applications.some((a) => a.job && a.job._id === jobId);
 
-  /* ✅ FILTER LOGIC */
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
       job.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -93,7 +95,10 @@ export default function ApplicantDashboard() {
       {/* TABS */}
       <div className="flex gap-4 mb-6">
         <button
-          onClick={() => setActiveTab("browse")}
+          onClick={() => {
+            setActiveTab("browse");
+            setSelectedJobForInterview(null);
+          }}
           className={`px-4 py-2 rounded ${
             activeTab === "browse"
               ? "bg-blue-600 text-white"
@@ -118,7 +123,6 @@ export default function ApplicantDashboard() {
       {/* BROWSE JOBS */}
       {activeTab === "browse" && (
         <>
-          {/* ✅ SEARCH BAR */}
           <div className="bg-white p-4 rounded-xl shadow mb-6 flex flex-col md:flex-row gap-4">
             <input
               type="text"
@@ -147,7 +151,6 @@ export default function ApplicantDashboard() {
             </button>
           </div>
 
-          {/* JOB LIST */}
           <div className="grid md:grid-cols-2 gap-6">
             {filteredJobs.length === 0 ? (
               <p className="text-gray-500">No jobs found</p>
@@ -197,7 +200,7 @@ export default function ApplicantDashboard() {
 
       {/* MY APPLICATIONS */}
       {activeTab === "applications" && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {applications.length === 0 ? (
             <p className="text-gray-500">
               You haven’t applied yet
@@ -215,9 +218,32 @@ export default function ApplicantDashboard() {
                 <span className="inline-block mt-2 px-3 py-1 rounded-full bg-yellow-100">
                   {app.status}
                 </span>
+
+                <button
+                  onClick={() =>
+                    setSelectedJobForInterview(app.job._id)
+                  }
+                  className="mt-4 bg-purple-600 text-white px-4 py-2 rounded"
+                >
+                  🎭 Start Mock Interview
+                </button>
               </div>
+
             ))
           )}
+
+          {/* 🎭 Interview Section */}
+          {selectedJobForInterview && (
+            <div className="mt-10">
+              <MockInterview
+                jobId={selectedJobForInterview}
+                token={token}
+              />
+              <InterviewAnalytics token={token} />
+            </div>
+          )}
+          
+          
         </div>
       )}
     </div>
