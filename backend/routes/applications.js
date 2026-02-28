@@ -3,8 +3,9 @@ import Application from "../models/Application.js";
 import Job from "../models/Job.js";
 import jwt from "jsonwebtoken";
 import multer from "multer";
-import fs from "fs";
-import path from "path";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "../config/cloudinary.js";
+
 const router = express.Router();
 
 /* ================= AUTH MIDDLEWARE ================= */
@@ -24,48 +25,36 @@ const protect = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { id, role }
+    req.user = decoded;
     next();
   } catch {
     return res.status(401).json({ message: "Invalid token" });
   }
 };
 
-/* ================= MULTER CONFIG ================= */
-// 🔥 CREATE UPLOAD FOLDER IF NOT EXISTS
-const uploadDir = path.join("uploads/resumes");
+/* ================= CLOUDINARY STORAGE ================= */
 
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);   // ✅ USE THIS
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "jobportal_resumes",
+    resource_type: "raw", // Important for PDFs
+    public_id: (req, file) => Date.now() + "-" + file.originalname,
   },
 });
 
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === "application/pdf") {
-      cb(null, true);
-    } else {
-      cb(new Error("Only PDF allowed"));
-    }
-  },
-});
+const upload = multer({ storage });
 
-/* ================= APPLY TO JOB (WITH RESUME) ================= */
+/* ================= APPLY TO JOB ================= */
+
 router.post(
   "/:jobId",
   protect,
-  upload.single("resume"), // ✅ REQUIRED
+  upload.single("resume"),
   async (req, res) => {
     try {
+      console.log("Uploaded file object:", req.file);
+
       const job = await Job.findById(req.params.jobId);
       if (!job) {
         return res.status(404).json({ message: "Job not found" });
@@ -85,7 +74,7 @@ router.post(
       const application = await Application.create({
         job: job._id,
         applicant: req.user.id,
-        resume: req.file ? req.file.path : null, // 🔥 THIS LINE
+        resume: req.file ? req.file.path : null, // Cloudinary URL
         status: "Applied",
       });
 
@@ -97,8 +86,8 @@ router.post(
   }
 );
 
-
 /* ================= MY APPLICATIONS ================= */
+
 router.get("/my", protect, async (req, res) => {
   const applications = await Application.find({
     applicant: req.user.id,
@@ -107,7 +96,8 @@ router.get("/my", protect, async (req, res) => {
   res.json(applications);
 });
 
-/* ================= VIEW APPLICANTS (Recruiter) ================= */
+/* ================= VIEW APPLICANTS ================= */
+
 router.get("/job/:jobId", protect, async (req, res) => {
   const applications = await Application.find({
     job: req.params.jobId,
@@ -117,6 +107,7 @@ router.get("/job/:jobId", protect, async (req, res) => {
 });
 
 /* ================= UPDATE STATUS ================= */
+
 router.put("/:applicationId/status", protect, async (req, res) => {
   const application = await Application.findById(req.params.applicationId);
   application.status = req.body.status;

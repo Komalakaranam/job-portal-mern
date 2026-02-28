@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import fs from "fs";
 
 /* ================= GEMINI CALL FUNCTION ================= */
 
@@ -117,3 +118,50 @@ Return ONLY JSON in this format:
     };
   }
 };
+
+
+
+export const simulateAtsScore = async (resumePath, jobSkills) => {
+  try {
+    // ✅ dynamic import for CommonJS package
+    const pdfParseModule = await import("pdf-parse");
+    const pdfParse = pdfParseModule.default;
+
+    const buffer = fs.readFileSync(resumePath);
+    const data = await pdfParse(buffer);
+
+    const resumeText = data.text;
+
+    const prompt = `
+You are an ATS system.
+
+Job required skills:
+${jobSkills.join(", ")}
+
+Resume content:
+${resumeText}
+
+Return ONLY JSON:
+{
+  "atsScore": number,
+  "matchedSkills": [],
+  "missingSkills": [],
+  "improvementSuggestions": []
+}
+`;
+
+    const text = await callGemini(prompt);
+    return JSON.parse(text);
+
+  } catch (error) {
+    console.error("ATS Error:", error.message);
+    return {
+      atsScore: 0,
+      matchedSkills: [],
+      missingSkills: [],
+      improvementSuggestions: ["Failed to analyze resume"]
+    };
+  }
+};
+
+    
