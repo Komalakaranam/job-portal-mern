@@ -20,7 +20,7 @@ export default function ApplicantDashboard() {
   /* FETCH JOBS */
   const fetchJobs = async () => {
     const res = await axios.get(
-      "https://job-portal-mern-6.onrender.com/api/jobs"
+      "https://job-portal-mern-4.onrender.com/api/jobs"
     );
     setJobs(res.data);
   };
@@ -28,7 +28,7 @@ export default function ApplicantDashboard() {
   /* FETCH APPLICATIONS */
   const fetchApplications = async () => {
     const res = await axios.get(
-      "https://job-portal-mern-6.onrender.com/api/applications/my",
+      "https://job-portal-mern-4.onrender.com/api/applications/my",
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -57,7 +57,7 @@ export default function ApplicantDashboard() {
       formData.append("resume", resumeFile);
 
       await axios.post(
-        `https://job-portal-mern-6.onrender.com/api/applications/${jobId}`,
+        `https://job-portal-mern-4.onrender.com/api/applications/${jobId}`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },

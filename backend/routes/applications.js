@@ -80,9 +80,14 @@ router.post(
 
       res.status(201).json(application);
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server error" });
-    }
+  console.error("FULL ERROR:", err);
+  console.error("ERROR MESSAGE:", err.message);
+  console.error("STACK:", err.stack);
+
+  res.status(500).json({
+    message: err.message,
+  });
+}
   }
 );
 
