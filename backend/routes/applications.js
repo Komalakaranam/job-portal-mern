@@ -46,7 +46,6 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 /* ================= APPLY TO JOB ================= */
-
 router.post(
   "/:jobId",
   protect,
@@ -74,20 +73,18 @@ router.post(
       const application = await Application.create({
         job: job._id,
         applicant: req.user.id,
-        resume: req.file ? req.file.path : null, // Cloudinary URL
+        resume: req.file ? req.file.path : null,
         status: "Applied",
       });
 
       res.status(201).json(application);
-    } catch (err) {
-  console.error("FULL ERROR:", err);
-  console.error("ERROR MESSAGE:", err.message);
-  console.error("STACK:", err.stack);
 
-  res.status(500).json({
-    message: err.message,
-  });
-}
+    } catch (err) {
+      console.error("FULL ERROR:", err);
+      res.status(500).json({
+        message: err.message || "Server error",
+      });
+    }
   }
 );
 
