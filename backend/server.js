@@ -35,6 +35,7 @@ app.listen(PORT, () => {
 
 
 */
+/*
 import dotenv from "dotenv";
 dotenv.config();
 console.log("ENV CHECK:");
@@ -76,4 +77,62 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+});*/
+
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+
+import connectDB from "./config/db.js";
+import authRoutes from "./routes/auth.js";
+import jobRoutes from "./routes/jobs.js";
+import applicationRoutes from "./routes/applications.js";
+import aiRoutes from "./routes/ai.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+
+/* ================= MIDDLEWARE ================= */
+app.use(cors());
+app.use(express.json());
+
+/* ================= STATIC FILES ================= */
+// Only needed if still using local uploads
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+/* ================= ROUTES ================= */
+app.use("/api/auth", authRoutes);
+app.use("/api/jobs", jobRoutes);
+app.use("/api/applications", applicationRoutes);
+app.use("/api/ai", aiRoutes);
+
+/* ================= HEALTH CHECK (IMPORTANT FOR RENDER) ================= */
+app.get("/", (req, res) => {
+  res.status(200).send("Backend Live ✅");
 });
+
+/* ================= START SERVER SAFELY ================= */
+const startServer = async () => {
+  try {
+    await connectDB(); // Wait for MongoDB connection
+
+    const PORT = process.env.PORT || 5000;
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+
+  } catch (error) {
+    console.error("❌ Startup Error:", error);
+    process.exit(1);
+  }
+};
+
+startServer();
