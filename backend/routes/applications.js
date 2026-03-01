@@ -3,6 +3,7 @@ import Application from "../models/Application.js";
 import Job from "../models/Job.js";
 import jwt from "jsonwebtoken";
 import multer from "multer";
+import path from "path";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../config/cloudinary.js";
 
@@ -34,25 +35,28 @@ const protect = (req, res, next) => {
 
 /* ================= CLOUDINARY STORAGE ================= */
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "jobportal_resumes",
-    resource_type: "raw", // Important for PDFs
-    public_id: (req, file) => Date.now() + "-" + file.originalname,
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
 const upload = multer({ storage });
-
 /* ================= APPLY TO JOB ================= */
 router.post(
   "/:jobId",
   protect,
-  upload.none(),
+  upload.single("resume"),
   async (req, res) => {
     try {
       console.log("Uploaded file object:", req.file);
+      console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+    console.log("USER:", req.user);
 
       const job = await Job.findById(req.params.jobId);
       if (!job) {
@@ -73,7 +77,7 @@ router.post(
       const application = await Application.create({
         job: job._id,
         applicant: req.user.id,
-        resume: null,
+        resume: req.file ? req.file.path : null,
         status: "Applied",
       });
 

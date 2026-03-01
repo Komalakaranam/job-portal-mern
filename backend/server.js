@@ -47,6 +47,8 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
+
 import { fileURLToPath } from "url";
 
 import connectDB from "./config/db.js";
@@ -75,6 +77,9 @@ app.use("/api/ai", aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

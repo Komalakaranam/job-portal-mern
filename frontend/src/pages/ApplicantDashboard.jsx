@@ -46,22 +46,32 @@ export default function ApplicantDashboard() {
   }, []);
 
   /* APPLY JOB */
-  const applyJob = async (jobId) => {
+ const applyJob = async (jobId) => {
   try {
+    if (!resumeFile) {
+      alert("Please upload resume");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("resume", resumeFile);
+
     await axios.post(
       `https://job-portal-mern-6.onrender.com/api/applications/${jobId}`,
-      {},
+      formData,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
     alert("Applied successfully");
     fetchApplications();
-    setActiveTab("applications");
 
   } catch (err) {
-    alert(err.response?.data?.message || "Apply failed");
+    console.log(err);
+    alert("Apply failed");
   }
 };
 
