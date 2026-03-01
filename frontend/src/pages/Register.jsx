@@ -13,10 +13,11 @@ export default function Register() {
   });
 
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError(""); // clear error when typing
+    setError("");
   };
 
   const handleSubmit = async (e) => {
@@ -27,7 +28,7 @@ export default function Register() {
 
     if (!passwordRegex.test(form.password)) {
       setError(
-        "Password must be at least 8 characters, include 1 uppercase letter and 1 special character."
+        "Password must be 8+ characters, include 1 uppercase and 1 special character."
       );
       return;
     }
@@ -48,6 +49,7 @@ export default function Register() {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+
           <input
             name="name"
             placeholder="Full Name"
@@ -65,15 +67,25 @@ export default function Register() {
             required
           />
 
-          <div>
+          {/* 🔐 Password Field with Toggle */}
+          <div className="relative">
             <input
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               onChange={handleChange}
-              className="w-full border px-4 py-3 rounded-md"
+              className="w-full border px-4 py-3 rounded-md pr-12"
               required
             />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              {showPassword ? "🙈" : "👁"}
+            </button>
+
             <p className="text-xs text-gray-500 mt-1">
               8+ characters, 1 uppercase, 1 special character
             </p>
@@ -90,7 +102,6 @@ export default function Register() {
             <option value="recruiter">Recruiter</option>
           </select>
 
-          {/* 🔴 Error message display */}
           {error && (
             <p className="text-red-600 text-sm font-medium">
               {error}
@@ -100,6 +111,7 @@ export default function Register() {
           <button className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition">
             Register
           </button>
+
         </form>
 
         <p className="text-center text-sm mt-6">
