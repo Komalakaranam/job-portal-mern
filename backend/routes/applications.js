@@ -49,7 +49,7 @@ const upload = multer({ storage });
 router.post(
   "/:jobId",
   protect,
-  upload.single("resume"),
+  upload.none(),
   async (req, res) => {
     try {
       console.log("Uploaded file object:", req.file);
@@ -73,7 +73,7 @@ router.post(
       const application = await Application.create({
         job: job._id,
         applicant: req.user.id,
-        resume: req.file ? req.file.path : null,
+        resume: null,
         status: "Applied",
       });
 
