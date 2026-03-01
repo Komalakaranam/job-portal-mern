@@ -4,6 +4,7 @@ import API from "../services/api";
 
 export default function Register() {
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -11,18 +12,31 @@ export default function Register() {
     role: "",
   });
 
+  const [error, setError] = useState("");
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError(""); // clear error when typing
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+
+    if (!passwordRegex.test(form.password)) {
+      setError(
+        "Password must be at least 8 characters, include 1 uppercase letter and 1 special character."
+      );
+      return;
+    }
+
     try {
       await API.post("/auth/register", form);
-      alert("Registration successful!");
       navigate("/login");
     } catch (err) {
-      alert(err.response?.data?.message || "Registration failed");
+      setError(err.response?.data?.message || "Registration failed");
     }
   };
 
@@ -39,6 +53,7 @@ export default function Register() {
             placeholder="Full Name"
             onChange={handleChange}
             className="w-full border px-4 py-3 rounded-md"
+            required
           />
 
           <input
@@ -47,29 +62,42 @@ export default function Register() {
             placeholder="Email ID"
             onChange={handleChange}
             className="w-full border px-4 py-3 rounded-md"
+            required
           />
 
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            onChange={handleChange}
-            className="w-full border px-4 py-3 rounded-md"
-          />
+          <div>
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              onChange={handleChange}
+              className="w-full border px-4 py-3 rounded-md"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              8+ characters, 1 uppercase, 1 special character
+            </p>
+          </div>
 
           <select
-  name="role"
-  onChange={handleChange}
-  className="w-full border px-4 py-3 rounded-md"
-  required
->
-  <option value="">Select Role</option>
-  <option value="applicant">Job Seeker</option>
-  <option value="recruiter">Recruiter</option>
-</select>
+            name="role"
+            onChange={handleChange}
+            className="w-full border px-4 py-3 rounded-md"
+            required
+          >
+            <option value="">Select Role</option>
+            <option value="applicant">Job Seeker</option>
+            <option value="recruiter">Recruiter</option>
+          </select>
 
+          {/* 🔴 Error message display */}
+          {error && (
+            <p className="text-red-600 text-sm font-medium">
+              {error}
+            </p>
+          )}
 
-          <button className="w-full bg-blue-600 text-white py-3 rounded-md">
+          <button className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition">
             Register
           </button>
         </form>

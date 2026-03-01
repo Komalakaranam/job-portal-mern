@@ -10,6 +10,15 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    const passwordRegex =
+    /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({
+      message:
+        "Password must be at least 8 characters long, contain one uppercase letter and one special character",
+    });
+  }
 
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: "All fields required" });

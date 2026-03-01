@@ -44,7 +44,7 @@ export const generateInterviewQuestions = async (
   companyName
 ) => {
   const prompt = `
-Generate 5 interview questions for the role of ${jobTitle} at ${companyName}.
+Generate 8 interview questions for the role of ${jobTitle} at ${companyName}.
 Focus on these skills: ${jobSkills.join(",")}.
 
 Return ONLY JSON:

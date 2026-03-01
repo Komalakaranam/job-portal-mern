@@ -14,7 +14,7 @@ export default function MockInterview({ jobId, token }) {
     const fetchQuestions = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/ai/mock-interview/${jobId}`,
+          `https://job-portal-mern-6.onrender.com/api/ai/mock-interview/${jobId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -39,7 +39,7 @@ export default function MockInterview({ jobId, token }) {
 
     try {
       const res = await axios.post(
-  `http://localhost:5000/api/ai/mock-interview/${jobId}/evaluate`,
+  `https://job-portal-mern-6.onrender.com/api/ai/mock-interview/${jobId}/evaluate`,
         {
           question: questions[currentIndex],
           answer,

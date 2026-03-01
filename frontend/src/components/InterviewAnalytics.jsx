@@ -16,7 +16,7 @@ export default function InterviewAnalytics({ token }) {
   useEffect(() => {
     const fetchHistory = async () => {
       const res = await axios.get(
-        "http://localhost:5000/api/ai/interview/history",
+       " https:job-portal-mern-6.onrender.com/api/ai/interview/history",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
